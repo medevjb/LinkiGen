@@ -1,0 +1,28 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.idea/
+.vscode/
+*.swp
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Dependencies (for the future Laravel + Next.js implementation)
+node_modules/
+vendor/
+
+# Build output
+/public/build/
+/public/hot
+.next/
+out/
+dist/
+
+# Runtime
+/storage/*.key
+*.log
