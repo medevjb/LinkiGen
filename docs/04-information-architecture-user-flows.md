@@ -192,11 +192,17 @@ Statuses:
 - Published
 - Failed
 
-### Manual publishing fallback
-`Approved → Copy Post → Open LinkedIn → User Publishes → Mark Published`
+Editing an Approved post revokes the approval and returns it to Needs Approval — no unapproved text can reach LinkedIn (`content/post-authoring`).
 
-### API publishing path
-`Approved → Scheduled → Background Publish Job → Published/Failed`
+### Manual publishing path — ships in MVP 1, every plan
+`Approved → Scheduled → Reminder at Scheduled Time → Copy Post → Open LinkedIn → User Publishes → Mark Published`
+
+If the user does not confirm within the reminder window, the system reminds once more and then leaves the post in its ready state — never silently marked Published or Failed.
+
+### Automated publishing path — interface exists; not connected in MVP 1
+`Approved → Scheduled → Background Publish Job (idempotent) → Published/Failed`
+
+An expired or revoked authorization does not retry blindly: the integration is marked as needing reconnection and affected posts fall back to the manual path (`ADR-006`).
 
 ## 12. Content Calendar Flow
 
@@ -212,11 +218,14 @@ Avoid complex social-media-management functionality in MVP.
 
 ## 13. Automatic Job Discovery Flow
 
-`Scheduled Job Search → Sources → Normalize Jobs → Filter → AI Match → Rank → Save Top Matches → Notify`
+`Scheduled Job Search → Registered JobSource Adapters → Normalize Jobs → Filter → AI Match → Rank → Save Top Matches → Notify`
 
-System should not surface all collected jobs.
+System does not surface all collected jobs. Only useful matches above the user's threshold reach the user-facing list.
 
-Only useful matches should reach the user-facing list.
+### No source configured
+`Discovery Trigger → No JobSource Registered → Discovery Marked Unavailable → Manual Analysis Offered`
+
+This is a defined, permanent product state for accounts with no job source connected, not an error (`jobs/job-discovery`). Manual analysis (§14) carries the job value proposition on its own in this state.
 
 ## 14. Manual Job Analysis Flow
 
@@ -307,6 +316,73 @@ Every failed AI/background operation should support at least one of:
 - User notification
 
 The user should never be left with an indefinite loading state.
+
+## 20a. Data Export Flow
+
+`Settings → Request Export → Queued → Notification: Export Ready → Signed Download Link → Download`
+
+### Success
+Export covers every personal data class except secrets (`10-security-privacy-compliance.md` §3). The link expires after the configured window.
+
+### Failure
+`Export Failed → Notify → Offer Retry`. No partial export is presented as complete.
+
+Governed by `identity/account-access`.
+
+## 20b. Account Deletion Flow
+
+`Settings → Request Deletion → Confirm → Automation Halted Immediately → Sessions Revoked → Scheduled Content Cancelled → Erasure Window → Erasure Complete`
+
+### Immediate effects (before the erasure window elapses)
+- All automations disabled
+- Scheduled publishing and queued jobs for the account cancelled
+- Sessions revoked
+- Any job already executing checks the deletion marker before persisting and discards its output if the marker is set
+
+### Cancellation
+`Within Erasure Window → Cancel Deletion → Account and Automation Restored`
+
+### Completion
+`Erasure Window Elapses → Data Erased or Anonymized → Confirmation Sent`
+
+Governed by `identity/account-access` and `platform/data-privacy-and-retention`.
+
+## 20c. Quota Exhaustion Flow
+
+`Metered Action Requested → Entitlement Checked Before AI Call → Quota Exhausted → Refused With Limit + Reset Date → Upgrade Offered`
+
+This check happens **before** any provider cost is incurred — the AI call never fires (`billing/plans-and-entitlements`).
+
+### Automation variant
+`Scheduled Automation Fires → Quota Exhausted → Run Skipped (not failed) → Notified Once Per Period → Resumes Automatically at Period Reset`
+
+### Mid-batch variant
+`Batch Operation Running (e.g. job matching) → Quota Exhausted Partway → Completed Items Persisted → Operation Reports Partial → Remainder Deferred`
+
+Completed work from a partial batch is never discarded to make an accounting boundary tidy.
+
+### Approaching a limit
+`Usage Crosses 80% → Warned Once Per Entitlement Per Period`
+
+## 20d. Billing Lifecycle Flow
+
+`Free → Checkout → Provider-Hosted Payment → Webhook Confirms → Entitlements Upgraded Immediately`
+
+### Downgrade
+`Downgrade Requested → Takes Effect at Period End → Paid Access Continues to Period End → Excluded Automations Disabled With Explanation → No Data Deleted`
+
+If the account is scheduling content above the new plan's entitlement, those posts are retained as Approved drafts with manual publishing available — not deleted or silently unscheduled.
+
+### Payment failure
+`Renewal Fails → Notify Immediately → 7-Day Grace Period at Full Entitlements → Provider Retries → Grace Period Elapses → Downgrade to Free (Data Intact)`
+
+### Cancellation
+`Cancel Requested → Paid Access Continues to Period End → Reverts to Free (Data Intact)`
+
+### Billing provider unreachable
+`Provider Unreachable → Entitlements Never Revoked on This Basis → Reconcile When Reachable`
+
+Governed by `billing/plans-and-entitlements`.
 
 ## 21. Global Approval Logic
 

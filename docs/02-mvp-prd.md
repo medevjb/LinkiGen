@@ -221,26 +221,30 @@ Status:
 
 ### 4.10 LinkedIn Publishing
 
-Initial implementation may support:
+**MVP 1 ships the manual publishing path only** (`ADR-006`). Automated publishing through the LinkedIn API is designed behind a `PublishingProvider` interface and ships dark; MVP 1 launch has no dependency on LinkedIn partner approval. See `content/scheduling-and-publishing`.
 
-**Option A — Manual fallback**
+**Manual path (ships in MVP 1, every plan):**
+- At the scheduled time, the user is notified that the post is ready
 - Copy post
 - Open LinkedIn
+- Confirm published
 
-**Option B — Official API**
-- Publish/schedule through permitted LinkedIn API access
+**Automated path (interface exists; not connected in MVP 1):**
+- Publish/schedule through permitted LinkedIn API access, once available
+- Uses an idempotency key so a retried job never publishes twice
+- An expired or revoked authorization is never blindly retried — it falls back to manual and prompts reconnection
 
-The product must not depend on unauthorized browser automation.
+The product must not depend on unauthorized browser automation, LinkedIn credentials, or browser cookies.
 
 Default MVP behavior for public posting:
-- Approval required unless user explicitly enables an available/policy-compliant autopublish option.
+- Approval required in Copilot mode, regardless of which path performs the publish.
 
 ### 4.11 Job Discovery / Job Analysis
 
-MVP may support both:
+**Manual analysis is the guaranteed MVP path** and works on every plan without any external dependency. **Automatic discovery** runs behind a pluggable `JobSource` adapter interface; with no source configured, discovery reports itself unavailable rather than showing an empty list (`ADR-006`, `jobs/job-discovery`).
 
 #### Automatic Discovery
-From permitted/public job sources or licensed/allowed integrations.
+From one configured, permitted, public or licensed job source. LinkedIn job listings are never scraped.
 
 #### Manual Analysis
 User provides:
@@ -422,23 +426,27 @@ As a user, I want control over what the AI can do automatically and what require
 
 ## 8. Acceptance Criteria — MVP Level
 
-MVP is functionally ready when a new user can:
+MVP is functionally ready when a new user can complete the fifteen steps below. The detailed, testable acceptance criteria for each step — including its error, empty, and partial-success paths — live in the referenced capability spec, not here. This table is the map from scope to spec; do not restate spec content in this document.
 
-1. Register.
-2. Submit a LinkedIn URL.
-3. Receive a structured Career Profile.
-4. Correct and confirm profile data.
-5. Set career goals.
-6. Reach the dashboard.
-7. Receive a profile analysis.
-8. Receive a weekly plan.
-9. Generate and approve a LinkedIn post.
-10. Place a post on the content calendar.
-11. Configure automation preferences.
-12. Analyze or receive at least one job match.
-13. Save/update a job application.
-14. Receive an in-app or email notification.
-15. View automation/task history sufficiently to understand what happened.
+| # | User can... | Governing capability |
+|---|---|---|
+| 1 | Register | `identity/account-access` |
+| 2 | Submit a LinkedIn URL | `career/profile-import` |
+| 3 | Receive a structured Career Profile | `career/profile-import` |
+| 4 | Correct and confirm profile data | `career/career-profile` |
+| 5 | Set career goals | `career/goals-and-analysis` |
+| 6 | Reach the dashboard | `05-screen-requirements-ux-states.md` §7 |
+| 7 | Receive a profile analysis | `career/goals-and-analysis` |
+| 8 | Receive a weekly plan | `planning/weekly-plan` |
+| 9 | Generate and approve a LinkedIn post | `content/post-authoring` |
+| 10 | Place a post on the content calendar | `content/scheduling-and-publishing` |
+| 11 | Configure automation preferences | `automation/automation-control` |
+| 12 | Analyze or receive at least one job match | `jobs/job-analysis`, `jobs/job-discovery` |
+| 13 | Save/update a job application | `jobs/application-tracker` |
+| 14 | Receive an in-app or email notification | `notifications/notifications-and-digests` |
+| 15 | View automation/task history sufficiently to understand what happened | `automation/automation-control` |
+
+The full traceability table in `00-README.md` maps every scope section in this document to its governing capability, not just these fifteen steps.
 
 ## 9. Initial Success Metrics
 
@@ -493,6 +501,19 @@ Mitigation:
 - Approval workflow.
 - Activity history.
 - Easy pause/disable controls.
+
+## 10a. Scenarios Resolved by This Revision
+
+A scenario sweep of the original documentation pack found real gaps: situations the product would hit on day one with no defined behavior. Each is now a tested requirement in its governing capability, not an open question.
+
+| Scenario | What was missing | Now governed by |
+|---|---|---|
+| **Duplicate LinkedIn URL claims** | Nothing stopped one user from importing a profile another account had already confirmed | `career/profile-import` — *Duplicate profile URL claims* |
+| **Expired publishing authorization** | Undefined whether a failed publish should retry blindly | `content/scheduling-and-publishing` — *Authorization expired* |
+| **Quota exhausted mid-batch** | Unclear whether partially completed AI work (e.g. job matching) was kept or discarded | `billing/plans-and-entitlements` — *Quota reached mid-batch* |
+| **Downgrade below current usage** | No rule for a plan change that leaves the account holding more than its new quota allows | `billing/plans-and-entitlements` — *Subscription lifecycle* |
+| **Account deletion with in-flight automation** | No rule preventing a running background job from writing results for a user who requested erasure | `identity/account-access` — *Account deletion* |
+| **DST transitions on scheduled posts** | No rule for a scheduled time falling in a skipped or repeated hour | `content/scheduling-and-publishing` — *Timezone and DST correctness* |
 
 ## 11. Future Scope
 

@@ -1,16 +1,14 @@
 # Product Vision & Business Brief
 
-## 1. Working Product Name
+## 1. Product Name
 
-**JB AI Career Agent**
-
-The final commercial product name may change. This document uses "JB AI Career Agent" as the working name.
+Working product name: **JB AI Career Agent**. Repository codename: **LinkiGen**. The final commercial name may change; this document and the rest of the pack use "JB AI Career Agent" consistently until it does. (Recorded assumption — see `00-README.md`.)
 
 ## 2. Product Vision
 
 Create an AI-powered career operating system for busy professionals that continuously improves their professional positioning, LinkedIn content presence, and job-search efficiency with minimal manual effort.
 
-The user should not need to repeatedly ask the system what to do. The product should understand the user's professional context, goals, preferences, previous actions, and outcomes, then proactively prepare the next best actions.
+The user should not need to repeatedly ask the system what to do. The product understands the user's professional context, goals, preferences, previous actions, and outcomes, then proactively prepares the next best actions.
 
 ## 3. Problem Statement
 
@@ -48,12 +46,12 @@ Professionals who want a better job but want AI to reduce the time spent discove
 
 ## 5. Jobs To Be Solved
 
-The product should help users answer:
+The product helps users answer:
 
 - What should I improve in my professional profile?
 - What should I do this week?
 - What should I post on LinkedIn?
-- Can the system prepare and schedule my content automatically?
+- Can the system prepare my content so publishing takes one click instead of a blank page?
 - Which jobs are actually worth my time?
 - How strong is my match for a role?
 - What should I improve before applying?
@@ -65,18 +63,18 @@ The product should help users answer:
 
 ## 7. Product Positioning
 
-The product should be positioned as:
+The product is positioned as:
 
 **An AI Career Agent**
 
-It should not be positioned only as:
+It is not positioned only as:
 - a LinkedIn post generator,
 - a social media scheduler,
 - a job board,
 - a resume builder,
 - or a LinkedIn automation bot.
 
-LinkedIn is an important channel and integration, but the product should own the user's broader career context.
+LinkedIn is an important channel and integration, but the product owns the user's broader career context, not just their LinkedIn presence.
 
 ## 8. Primary Differentiation
 
@@ -84,7 +82,7 @@ The MVP combines four connected systems:
 
 1. Professional profile intelligence
 2. Weekly career planning
-3. LinkedIn content automation
+3. LinkedIn content preparation and publishing
 4. Job opportunity intelligence
 
 The differentiator is the closed-loop model:
@@ -93,69 +91,69 @@ The differentiator is the closed-loop model:
 
 ## 9. Automation Philosophy
 
-Automation is central to the product.
+Automation is central to the product, applied consistently across three levels (`docs/07` §7):
 
-Three automation levels should exist:
-
-### Recommendation
-AI identifies what should happen, but the user performs the action.
+### Assistant
+AI recommends what should happen. The user performs the action.
 
 ### Copilot
-AI prepares the work; the user approves important actions.
+AI prepares the work. The user approves high-impact actions. The system executes what is permitted without approval.
 
 ### Autopilot
-The platform performs approved/permitted routine actions automatically.
+The system performs permitted, recurring actions automatically.
 
 **Default MVP mode: Copilot.**
 
-The product should avoid requiring the user to repeatedly provide context that has already been stored.
+The product avoids requiring the user to repeatedly provide context it has already stored.
+
+**What "automated" means at MVP 1.** Content preparation — ideas, drafts, editing, scheduling onto the calendar — is fully automated at Copilot today. Automated *publishing to LinkedIn* is designed behind an interface but ships in MVP 1 with a manual confirm-and-publish step, because it depends on LinkedIn partner approval the product does not yet hold (`ADR-006`). This is a launch-scope fact, not a positioning compromise: the manual step takes seconds, and every other part of the content loop — deciding what to say and preparing it — is where the time was actually being spent.
 
 ## 10. Onboarding Strategy
 
-The product must minimize onboarding friction.
+The product minimizes onboarding friction.
 
 Primary flow:
 
-`LinkedIn URL → OpenAI web research → Structured professional data → User review → Career Profile`
+`LinkedIn URL → AI web research → Structured professional data → User review → Career Profile`
 
-The system should research the maximum publicly available professional information it can find and normalize it into the Career Profile.
+The system researches the maximum publicly available professional information it can find and normalizes it into the Career Profile (`ADR-005`).
 
 If essential information is unavailable:
 - Ask only for the missing fields required for MVP features.
 - Offer resume/CV upload as fallback or enrichment.
 
-The application must not claim that it can always import 100% of a LinkedIn profile.
+The application does not claim it can always import a complete LinkedIn profile.
 
 ## 11. Business Model Hypothesis
 
-### Free
-Possible limits:
-- Basic profile analysis
-- Limited weekly actions
-- Limited post generation
-- Limited job matching
+Values below are a **hypothesis**, owned by this document, and revisable without changing any specification. The quota *mechanism* enforcing them is fixed in `11-billing-entitlements.md` and `billing/plans-and-entitlements`.
 
-### Pro
-Initial hypothesis:
-- Approximately USD $9–$15/month
+### Free
+- Profile import, review, and confirmation
+- Basic profile analysis
+- Limited weekly plans
+- Limited post generation
+- Manual job analysis
+- Manual publishing (always available, on every plan)
+
+### Pro — hypothesis ≈ $12/month
 - Full weekly planning
 - AI content strategy
 - More post generation
-- Scheduling
-- Job matching
-- Digests
+- Content scheduling and calendar
+- Automated job discovery and digests
 - Career analytics
 
-### Pro+
-Later hypothesis:
-- Approximately USD $19–$29/month
-- Advanced analytics
-- More automation
+### Pro+ — hypothesis ≈ $24/month
+- Higher generation ceilings
+- Autopilot automation level
 - Advanced career intelligence
-- Resume/interview capabilities
+- Resume/interview capabilities (future)
 
 ### Recruiter / B2B
 Future phase only. Not part of MVP 1.
+
+See `11-billing-entitlements.md` §3 for the concrete quota matrix these tiers imply, and §9 for the pricing questions still open.
 
 ## 12. MVP Business Objective
 
@@ -163,8 +161,8 @@ Validate whether busy professionals will repeatedly use and pay for a system tha
 
 1. Understands their career profile automatically.
 2. Tells them what to do each week.
-3. Creates most of their LinkedIn content.
-4. Automates or simplifies scheduling/publishing.
+3. Prepares most of their LinkedIn content.
+4. Simplifies scheduling, and removes the manual publishing step once LinkedIn API access is available.
 5. Finds and prioritizes relevant opportunities.
 6. Reduces time spent on career maintenance.
 
@@ -176,7 +174,7 @@ The MVP is promising if users:
 - Confirm the generated Career Profile.
 - Return weekly.
 - Complete or approve AI-generated tasks.
-- Approve/use generated LinkedIn content.
+- Approve and manually publish generated LinkedIn content.
 - Save/apply to recommended jobs.
 - Enable at least one automation.
 - Report meaningful time saved.
@@ -186,6 +184,7 @@ The MVP is promising if users:
 
 Future product expansion may include:
 
+- Automated LinkedIn publishing, once partner API access is secured (`ADR-006`)
 - Deeper LinkedIn analytics
 - Multi-network professional presence
 - Resume optimization

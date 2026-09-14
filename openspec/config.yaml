@@ -1,32 +1,60 @@
 schema: spec-driven
 
-# Project context (optional)
-# This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+# Project context — shown to AI when creating artifacts.
+context: |
+  PRODUCT
+  JB AI Career Agent (repo codename: LinkiGen). An AI career operating system for
+  busy professionals and active job seekers. The closed loop is:
+  Career Profile -> Goals -> Weekly Actions -> Content/Jobs -> Outcomes -> Learning.
+  Recruiter/B2B features are out of scope for MVP 1.
+
+  LOCKED ARCHITECTURE DECISIONS (see docs/ADR/)
+  - ADR-001: Laravel REST API backend + separate Next.js/TypeScript client.
+    PostgreSQL primary datastore. Two deployables, contract in docs/08-api-contract.md.
+  - ADR-002: Laravel Queues on Redis + Laravel Scheduler. All AI work is async.
+    Jobs must be idempotent for external actions, bounded-retry, observable,
+    deletion-aware, and quota-aware.
+  - ADR-003: OpenAI Responses API with web search + Structured Outputs.
+    Model output is ALWAYS schema-validated before a domain service writes it.
+    Never parse free-form AI text; never coerce an out-of-enum value.
+  - ADR-004: The confirmed CareerProfile is the single canonical context.
+    Authority order: user-authored > CV-extracted > researched > inferred.
+    Refresh PROPOSES changes; it never overwrites confirmed career history.
+  - ADR-005: Onboarding is LinkedIn-URL-first via public web research.
+    Never use LinkedIn credentials, cookies, CAPTCHA bypass, or private endpoints.
+    CV upload and manual entry are always-available first-class fallbacks.
+  - ADR-006: MVP publishing is MANUAL ONLY, behind a PublishingProvider interface.
+    Job discovery is manual analysis + one pluggable JobSource adapter.
+    The product must be fully usable with NO provider and NO job source connected.
+
+  DOCUMENT OWNERSHIP
+  - openspec/specs/<capability>/spec.md owns testable behavior and acceptance criteria.
+  - docs/ owns narrative context: 01 vision, 02 PRD scope, 03 personas, 04 IA/flows,
+    05 screens/UX states, 06 architecture/data model, 07 AI & automation,
+    08-16 implementation contracts, ADR/ decisions.
+  - Never state a normative requirement in both places. docs/ references specs by
+    capability path (e.g. content/scheduling-and-publishing), not by section number.
+
+  NON-NEGOTIABLE PRODUCT RULES
+  - Default automation level is Copilot. Public/reputation-sensitive actions need approval.
+  - AI must never invent employers, roles, dates, projects, credentials, or metrics.
+  - Automation failures must be visible; never present a failed run as successful.
+  - Users can always pause automation, export their data, and delete their account.
+  - Check entitlement BEFORE incurring AI provider cost; persist partial batch results.
+  - All scheduling is computed in the user's stored IANA timezone, never server time.
+
+  CONVENTIONS
+  - Avoid microservices, event buses, and separate vector databases unless a
+    measured requirement justifies them (docs/06).
+  - Record a new ADR when changing a major architectural assumption.
 
 # Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+# rules:
+#   proposal:
+#     - ...
 
 # Per-operation guidance (optional)
-# Add advisory guidance for how apply and archive work should be conducted.
-# This is separate from artifact rules above.
-# Example:
-#   operations:
-#     apply:
-#       guidance:
-#         - Keep test summaries concise
-#     archive:
-#       guidance:
-#         - Summarize the archive outcome before finishing
+# operations:
+#   apply:
+#     guidance:
+#       - ...

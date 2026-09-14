@@ -195,8 +195,9 @@ User can choose:
 
 System may ask only high-impact preferences:
 - Posting cadence
-- Job digest frequency
-- Whether publishing requires approval
+- Job digest frequency (if a job source is configured; otherwise this preference is hidden, not offered against a feature that will not run)
+
+**Publishing is manual in MVP 1** (`ADR-006`): the user confirms each post before it goes to LinkedIn. This is not a configurable preference at onboarding — it is how the product works at launch. Automated publishing, once available, still requires approval by default in Copilot mode; that default is not weakened during onboarding.
 
 ### Stage 7 — First Value
 
@@ -206,9 +207,9 @@ System generates:
 - First weekly plan
 - Initial content pillars
 - Initial post ideas
-- Initial job matches or job-analysis capability
+- Initial job matches, or — if no job source is configured — the manual job-analysis capability, presented as available and useful on its own rather than as a lesser fallback
 
-The user should receive useful output immediately after onboarding.
+The user receives useful output immediately after onboarding, whether or not automated job discovery is active for their account.
 
 ### Stage 8 — Weekly Use
 
