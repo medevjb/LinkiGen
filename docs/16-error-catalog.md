@@ -21,8 +21,9 @@ Every code is `SCREAMING_SNAKE_CASE`, globally unique, and stable — once shipp
 | `AUTH_REQUIRED` | 401 | "Sign in to continue." | Redirect to sign-in | `identity/account-access` |
 | `INVALID_CREDENTIALS` | 401 | "Email or password is incorrect." | Retry; forgot-password link | `identity/account-access` |
 | `EMAIL_VERIFICATION_REQUIRED` | 403 | "Verify your email to continue." | Resend verification | `identity/account-access` |
-| `VERIFICATION_LINK_EXPIRED` | 410 | "This link has expired." | Request a new link | `identity/account-access` |
-| `VERIFICATION_LINK_ALREADY_USED` | 410 | "This link was already used." | Request a new link | `identity/account-access` |
+| `OTP_INVALID` | 422 | "That code is incorrect." | Retry; resend after repeated failure | `identity/account-access` |
+| `OTP_EXPIRED` | 410 | "This code has expired." | Request a new code | `identity/account-access` |
+| `OTP_ATTEMPTS_EXCEEDED` | 429 | "Too many incorrect attempts." | Request a new code | `identity/account-access` |
 | `RESET_LINK_INVALID` | 410 | "This reset link is invalid or has expired." | Request a new link | `identity/account-access` |
 | `ACCOUNT_THROTTLED` | 429 | "Too many attempts. Try again shortly." | Show `retry_after` | `identity/account-access` |
 | `SESSION_EXPIRED` | 401 | "Your session has ended. Sign in again." | Redirect to sign-in | `identity/account-access` |
